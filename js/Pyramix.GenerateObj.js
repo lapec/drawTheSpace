@@ -3,7 +3,7 @@ var Pyramix	= Pyramix || {};
 
 Pyramix.GeneratePredefinedGeometry = function(type, name, radius, width, height, depth, posx, posy, posz, color, wireframeState)
 {
-    if(type==='Icosahedron'){
+    if(type === 'Icosahedron'){
         let geometry = new THREE.IcosahedronGeometry( radius,1 );
         let material = new THREE.MeshBasicMaterial( { color: color, wireframe: wireframeState, wireframeLinewidth: 2 } );
         let mesh = new THREE.Mesh( geometry, material );
@@ -15,7 +15,7 @@ Pyramix.GeneratePredefinedGeometry = function(type, name, radius, width, height,
         scene.add(mesh);   
     }
 
-    if(type==='Box'){
+    if(type === 'Box'){
         let geometry = new THREE.BoxGeometry( width, height, depth );
         let material = new THREE.MeshBasicMaterial( { color: color, wireframe: wireframeState, wireframeLinewidth: 2 } );
         let mesh = new THREE.Mesh( geometry, material );
@@ -25,14 +25,52 @@ Pyramix.GeneratePredefinedGeometry = function(type, name, radius, width, height,
         mesh.name = name;
         scene.add(mesh);
     }
+    // here we can call new function ObjectAnimation
+}
+
+Pyramix.animate = function(name, pointOfRotation, rotationAroundAxis, rotationAroundSun){
+    // simple rotation
+    if(rotationAroundAxis === true){
+        onRenderFcts.push(function(){
+            scene.getObjectByName(name).position.set(1, 1, 1);
+            scene.getObjectByName(name).rotation.y += 0.1;
+        })
+    }
+
+    // rotation around certain object
+    if(rotationAroundSun === true){
+        let parent = new THREE.Object3D;
+        let pivot1 = new THREE.Object3D;
+
+        for (var i = 10 - 1; i >= 0; i--) {
+            scene.getObjectByName(name).position.x = i+20;
+        }
+
+        sun = scene.getObjectByName(pointOfRotation);
+        pivot1.position.set(sun.position.x,sun.position.y,sun.position.z);
+        orbiter = scene.getObjectByName(name);
+        parent.add(pivot1);
+        pivot1.add(orbiter);
+        scene.add(parent);
+
+        onRenderFcts.push(function(){
+           // parent.rotation.y += 0.01;
+        })
+    }
+    
 }
 
 Pyramix.AnimatePredefinedGeometry = function(object){
-    onRenderFcts.push(function(){
-        scene.getObjectByName(object).rotation.x += 0;
-        scene.getObjectByName(object).rotation.y += 0.1;
-        scene.getObjectByName(object).rotation.z += 0;
-    })
+        onRenderFcts.push(function(){
+            //stop mesec
+            //animiranje svih objekata na sceni
+            if(object != 'earth'){
+                scene.getObjectByName(object).rotation.x += 0;
+                scene.getObjectByName(object).rotation.y += 0.1;
+                scene.getObjectByName(object).rotation.z += 0;
+            }
+
+        })
 }
 
 Pyramix.GenerateCustomGeometry = function(aVertex, aFaces, ime, color, posx, posy, posz)
